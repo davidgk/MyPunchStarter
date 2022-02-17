@@ -1,10 +1,10 @@
 const path = require('path');
-const reqPath = path.join(__dirname,'../../');
+const reqPath = path.join(__dirname,'../../../');
 const envPath = path.join(reqPath,'.env');
 require('dotenv').config({ path: envPath })
 const HDWalletProvider = require('@truffle/hdwallet-provider')
 const Web3 = require('web3')
-const {compileLottery} = require("../contractCompiler");
+const {compileMyPunchStarter} = require("../contractCompiler");
 /**
  *
  * @param apiInfura
@@ -37,7 +37,7 @@ const deploy = async (apiInfura = process.env.INFURA_RINKEBY_ENDPOINT_V3, contra
 
 
 const deployLotteryRinkeby = async () => {
-    await deploy(process.env.INFURA_RINKEBY_ENDPOINT_V3, compileLottery());
+    await deploy(process.env.INFURA_RINKEBY_ENDPOINT_V3, compileMyPunchStarter());
 }
 
 deployLotteryRinkeby();

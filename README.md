@@ -1,4 +1,4 @@
-# My Punch starter Solidity project
+# My Punch Starter 
 
 How to deal with real industry crowdfunding issues with smart contracts
 

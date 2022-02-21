@@ -77,6 +77,36 @@ describe ('MyPunchStarter Contract tests', () => {
         })
     })
 
+    describe('#createRequest', () => {
+        let anotherAccount, value, recipient;
+        const DESCRIPTION_REQUEST = "Some description"
+
+        describe('and manager wants to create a new Request', () => {
+            beforeEach(async () => {
+                value = contractDeployer.getWeb3Object().utils.toWei("0.1", 'ether');
+                campaign = await contractDeployer.deployContract(account, [100]);
+                recipient = accounts[1]
+                anotherAccount = accounts[2]
+            });
+            it('creates with the parametrized values', async () => {
+                await campaign.methods.createRequest(DESCRIPTION_REQUEST, value, recipient).send({ from: account, gas: 1000000 });
+                const requestSaved = await campaign.methods.requests(0).call();
+                expect(requestSaved.description).to.eq(DESCRIPTION_REQUEST);
+                expect(requestSaved.value).to.eq(String(contractDeployer.getWeb3Object().utils.toWei("0.1", 'ether')));
+                expect(requestSaved.recipient.toLowerCase()).to.eq(recipient);
+                expect(requestSaved.complete).to.eq(false);
+            })
+            it('and contributor wants to create a request should throw an error', async () => {
+                try {
+                    await campaign.methods.createRequest(DESCRIPTION_REQUEST, value, recipient).send({ from: anotherAccount, gas: 1000000 });
+                    expect.fail('Should fail')
+                } catch (e) {
+                    expect(e.message.split('\n')[0]).to.eq(STD_ERROR_TX)
+                }
+            })
+        })
+    })
+
     describe('when the campaign has an incorrect minimumContribution', () => {
         it( 'should throw an error', async () => {
             try {

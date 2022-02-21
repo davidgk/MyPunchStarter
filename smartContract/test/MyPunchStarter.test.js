@@ -52,6 +52,17 @@ describe ('MyPunchStarter Contract tests', () => {
         })
     })
 
+    describe('when the campaign has an incorrect minimumContribution', () => {
+        it( 'should throw an error', async () => {
+            try {
+                campaign = await contractDeployer.deployContract(account, [-1]);
+                expect.fail('Should fail')
+            } catch (e) {
+                expect(e.message.split('\n')[0]).to.eq('value out-of-bounds (argument="minimum", value=-1, code=INVALID_ARGUMENT, version=abi/5.0.7)')
+            }
+        })
+    })
+
     describe('#contribute', () => {
         let contributor, VALID_ETHER_VALUE_WEI
 
@@ -63,8 +74,17 @@ describe ('MyPunchStarter Contract tests', () => {
             });
             it('and contributor add the correct amount should be added into approvers', async () => {
                 await campaign.methods.contribute().send({ from: contributor, value: VALID_ETHER_VALUE_WEI  });
-                const contributorSaved = await campaign.methods.approvers(0).call();
-                expect(contributorSaved.toLowerCase()).to.eq(contributor);
+                const approvers = await campaign.methods.approvers(contributor.toLowerCase()).call();
+                expect(approvers).to.be.true;
+            })
+
+            it('and contributor not exists within approvers should trow an error', async () => {
+                try {
+                    await campaign.methods.approvers("0xsomenotexistantapprover").call();
+                    expect.fail('Should fail')
+                } catch (e) {
+                    expect(e.message.split('\n')[0]).to.eq("invalid address (argument=\"address\", value=\"0xsomenotexistantapprover\", code=INVALID_ARGUMENT, version=address/5.5.0) (argument=null, value=\"0xsomenotexistantapprover\", code=INVALID_ARGUMENT, version=abi/5.0.7)")
+                }
             })
             it('and contributor add incorrect amount should throw an error', async () => {
                 try {
@@ -78,44 +98,54 @@ describe ('MyPunchStarter Contract tests', () => {
     })
 
     describe('#createRequest', () => {
-        let anotherAccount, value, recipient;
+        let anotherAccount, value, recipient, VALID_ETHER_VALUE_WEI;
         const DESCRIPTION_REQUEST = "Some description"
-
-        describe('and manager wants to create a new Request', () => {
+        describe('and manager creates a new Request', () => {
             beforeEach(async () => {
                 value = contractDeployer.getWeb3Object().utils.toWei("0.1", 'ether');
                 campaign = await contractDeployer.deployContract(account, [100]);
                 recipient = accounts[1]
                 anotherAccount = accounts[2]
+
             });
-            it('creates with the parametrized values', async () => {
-                await campaign.methods.createRequest(DESCRIPTION_REQUEST, value, recipient).send({ from: account, gas: 1000000 });
-                const requestSaved = await campaign.methods.requests(0).call();
-                expect(requestSaved.description).to.eq(DESCRIPTION_REQUEST);
-                expect(requestSaved.value).to.eq(String(contractDeployer.getWeb3Object().utils.toWei("0.1", 'ether')));
-                expect(requestSaved.recipient.toLowerCase()).to.eq(recipient);
-                expect(requestSaved.complete).to.eq(false);
+            it(`when an user with account which is a contributor can approve it approve it`, async () => {
+                await campaign.methods.createRequest(DESCRIPTION_REQUEST, value, recipient).send({ from: account, gas: 1000000 });// TOOD
+                const request = await campaign.methods.requests(0).call();
+                expect(request.description).to.eq(DESCRIPTION_REQUEST);
+                expect(request.value).to.eq(value);
+                expect(request.recipient.toLowerCase()).to.eq(recipient);
+                expect(request.approvalCount).to.eq("0");
             })
-            it('and contributor wants to create a request should throw an error', async () => {
-                try {
-                    await campaign.methods.createRequest(DESCRIPTION_REQUEST, value, recipient).send({ from: anotherAccount, gas: 1000000 });
-                    expect.fail('Should fail')
-                } catch (e) {
-                    expect(e.message.split('\n')[0]).to.eq(STD_ERROR_TX)
-                }
+        })
+
+    })
+
+    describe.skip('#approveRequest', () => {
+        let anotherAccount, value, recipient, VALID_ETHER_VALUE_WEI;
+        const DESCRIPTION_REQUEST = "Some description"
+        describe('and we have several contributors', () => {
+            beforeEach(async () => {
+                VALID_ETHER_VALUE_WEI = contractDeployer.getWeb3Object().utils.toWei("0.01", 'ether');
+                await campaign.methods.contribute().send({ from: account[1], value: VALID_ETHER_VALUE_WEI  });
+                await campaign.methods.contribute().send({ from: account[2], value: VALID_ETHER_VALUE_WEI  });
+                await campaign.methods.contribute().send({ from: account[3], value: VALID_ETHER_VALUE_WEI  });
+
+            });
+        })
+        describe('and manager creates a new Request', () => {
+            beforeEach(async () => {
+                value = contractDeployer.getWeb3Object().utils.toWei("0.1", 'ether');
+                campaign = await contractDeployer.deployContract(account, [100]);
+                recipient = accounts[1]
+                anotherAccount = accounts[2]
+                await campaign.methods.createRequest(DESCRIPTION_REQUEST, value, recipient).send({ from: account, gas: 1000000 });
+            });
+            it(`when an user with account which is a contributor can approve it approve it`, () => {
+                // TOOD
             })
         })
     })
 
-    describe('when the campaign has an incorrect minimumContribution', () => {
-        it( 'should throw an error', async () => {
-            try {
-                campaign = await contractDeployer.deployContract(account, [-1]);
-                expect.fail('Should fail')
-            } catch (e) {
-                expect(e.message.split('\n')[0]).to.eq('value out-of-bounds (argument="minimum", value=-1, code=INVALID_ARGUMENT, version=abi/5.0.7)')
-            }
-        })
-    })
+
 
 })

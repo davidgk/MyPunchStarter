@@ -7,14 +7,16 @@ struct Request {
     uint value;
     address recipient;
     bool complete;
+    uint approvalCount;
 }
 
 contract MyPunchStarter {
     Request[] public requests;
+    uint numRequests;
     address public manager;
     uint public minimumContribution;
     uint public lastContribution;
-    address[] public  approvers;
+    mapping(address => bool) public approvers;
 
     modifier restricted() {
         require(msg.sender == manager);
@@ -26,14 +28,10 @@ contract MyPunchStarter {
         minimumContribution = minimum;
     }
 
-    function getApprovers() public view returns (address[] memory){
-        return approvers;
-    }
-
     function contribute() public payable {
         require(msg.value > minimumContribution);
         lastContribution = msg.value;
-        approvers.push(msg.sender);
+        approvers[msg.sender] = true;
     }
 
     function createRequest(string memory description, uint value, address recipient) public restricted {
@@ -41,8 +39,11 @@ contract MyPunchStarter {
             description: description,
             value: value,
             recipient: recipient,
-            complete: false
+            complete: false,
+            approvalCount: 0
         });
         requests.push(newRequest);
     }
+
+    function approveRequest() public view {}
 }

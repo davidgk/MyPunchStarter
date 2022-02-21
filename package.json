@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.0.0",
-    "solc": "0.8.9",
+    "solc": "0.8.12",
     "web3": "^1.7.0",
     "zicky": "1.0.3"
   },

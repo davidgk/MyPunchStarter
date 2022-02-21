@@ -1,18 +1,20 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.12;
 
-
-struct Request {
-    string description;
-    uint value;
-    address recipient;
-    bool complete;
-    uint approvalCount;
-}
 
 contract MyPunchStarter {
-    Request[] public requests;
+    struct Request {
+        string description;
+        uint value;
+        address recipient;
+        bool complete;
+        uint approvalCount;
+        uint numApprovals;
+        mapping(address => bool) approvals;
+    }
+
     uint numRequests;
+    mapping(uint => Request) public requests;
     address public manager;
     uint public minimumContribution;
     uint public lastContribution;
@@ -35,14 +37,21 @@ contract MyPunchStarter {
     }
 
     function createRequest(string memory description, uint value, address recipient) public restricted {
-        Request memory newRequest = Request({
-            description: description,
-            value: value,
-            recipient: recipient,
-            complete: false,
-            approvalCount: 0
-        });
-        requests.push(newRequest);
+        Request storage newRequest = requests[numRequests];
+        newRequest.description = description;
+        newRequest.value = value;
+        newRequest.recipient = recipient;
+        newRequest.complete = false;
+        newRequest.approvals[manager] = false;
+        numRequests++;
+    }
+
+    function approveRequest(uint requestIndex) public  {
+        require(approvers[msg.sender]);
+        require(!request.approvals[msg.sender]);
+        Request storage request = requests[requestIndex];
+        request.approvalCount++;
+        request.approvals[msg.sender] = true;
     }
 
     function approveRequest() public view {}

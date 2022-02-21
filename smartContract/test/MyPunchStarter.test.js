@@ -120,30 +120,34 @@ describe ('MyPunchStarter Contract tests', () => {
 
     })
 
-    describe.skip('#approveRequest', () => {
+    describe ('#approveRequest', () => {
         let anotherAccount, value, recipient, VALID_ETHER_VALUE_WEI;
         const DESCRIPTION_REQUEST = "Some description"
         describe('and we have several contributors', () => {
             beforeEach(async () => {
-                VALID_ETHER_VALUE_WEI = contractDeployer.getWeb3Object().utils.toWei("0.01", 'ether');
-                await campaign.methods.contribute().send({ from: account[1], value: VALID_ETHER_VALUE_WEI  });
-                await campaign.methods.contribute().send({ from: account[2], value: VALID_ETHER_VALUE_WEI  });
-                await campaign.methods.contribute().send({ from: account[3], value: VALID_ETHER_VALUE_WEI  });
-
-            });
-        })
-        describe('and manager creates a new Request', () => {
-            beforeEach(async () => {
-                value = contractDeployer.getWeb3Object().utils.toWei("0.1", 'ether');
                 campaign = await contractDeployer.deployContract(account, [100]);
-                recipient = accounts[1]
-                anotherAccount = accounts[2]
-                await campaign.methods.createRequest(DESCRIPTION_REQUEST, value, recipient).send({ from: account, gas: 1000000 });
+                VALID_ETHER_VALUE_WEI = contractDeployer.getWeb3Object().utils.toWei("0.01", 'ether');
+                await campaign.methods.contribute().send({ from: accounts[1].toLowerCase(), value: VALID_ETHER_VALUE_WEI  });
+                await campaign.methods.contribute().send({ from: accounts[2].toLowerCase(), value: VALID_ETHER_VALUE_WEI  });
+                await campaign.methods.contribute().send({ from: accounts[3].toLowerCase(), value: VALID_ETHER_VALUE_WEI  });
             });
-            it(`when an user with account which is a contributor can approve it approve it`, () => {
-                // TOOD
+            describe('and manager creates a new Request', () => {
+                beforeEach(async () => {
+                    value = contractDeployer.getWeb3Object().utils.toWei("0.1", 'ether');
+                    campaign = await contractDeployer.deployContract(account, [100]);
+                    recipient = accounts[1]
+                    anotherAccount = accounts[2]
+                    await campaign.methods.createRequest(DESCRIPTION_REQUEST, value, recipient).send({ from: account, gas: 1000000 });
+                });
+                it(`when an user with account which not approves previously is a contributor can approve it `, async() => {
+                    await campaign.methods.approveRequest(0).send({ from: accounts[1].toLowerCase(), gas: 1000000 });
+                    const request = await campaign.methods.requests(0).call();
+                    expect(request.approvalCount).to.eq("1");
+                    expect(request.approvals[account[1]]).to.be.true
+                })
             })
         })
+
     })
 
 

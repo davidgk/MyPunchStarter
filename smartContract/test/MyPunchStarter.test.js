@@ -123,24 +123,28 @@ describe ('MyPunchStarter Contract tests', () => {
     describe ('#approveRequest', () => {
         let anotherAccount, value, recipient, VALID_ETHER_VALUE_WEI, BALANCE;
         const DESCRIPTION_REQUEST = "Some description"
-        describe('and we have several contributors', () => {
+        describe('and manager creates a new Request', () => {
             beforeEach(async () => {
                 BALANCE = contractDeployer.getWeb3Object().utils.toWei("1", 'ether');
                 VALID_ETHER_VALUE_WEI = contractDeployer.getWeb3Object().utils.toWei("0.01", 'ether');
                 campaign = await contractDeployer.deployContract(account, [100], BALANCE);
+                value = contractDeployer.getWeb3Object().utils.toWei("0.1", 'ether');
+                recipient = accounts[1].toLowerCase()
+                await campaign.methods.createRequest(DESCRIPTION_REQUEST, value, recipient).send({ from: account, gas: 1000000 });
             });
-            describe('and manager creates a new Request', () => {
+            describe('and we have several contributors', () => {
                 beforeEach(async () => {
-                    value = contractDeployer.getWeb3Object().utils.toWei("0.1", 'ether');
-                    recipient = accounts[1].toLowerCase()
                     anotherAccount = accounts[2].toLowerCase();
+                    const anotherAccount03 = accounts[3].toLowerCase();
+                    const anotherAccount04 = accounts[4].toLowerCase();
                     await campaign.methods.contribute().send({ from: anotherAccount, value: VALID_ETHER_VALUE_WEI  });
-                    await campaign.methods.createRequest(DESCRIPTION_REQUEST, value, recipient).send({ from: account, gas: 1000000 });
+                    await campaign.methods.contribute().send({ from: anotherAccount03, value: VALID_ETHER_VALUE_WEI  });
+                    await campaign.methods.contribute().send({ from: anotherAccount04, value: VALID_ETHER_VALUE_WEI  });
                 });
                 it(`when an user with account which not approves previously is a contributor can approve it `, async() => {
                     await campaign.methods.approveRequest(0).send({ from: anotherAccount, gas: 1000000 });
                     const request = await campaign.methods.requests(0).call();
-                    expect(request.approvalCount).to.eq("1");
+                    expect(request.numApprovals).to.eq("1");
                 })
                 it(`when an user with account which  approves previously throws an error`, async() => {
                     try {
@@ -159,12 +163,107 @@ describe ('MyPunchStarter Contract tests', () => {
                         expect(e.message.split('\n')[0]).to.eq(STD_ERROR_TX)
                     }
                 })
-
             })
         })
-
     })
 
+    describe ('#finalizeRequest', () => {
+        let anotherAccount, value, recipient, VALID_ETHER_VALUE_WEI, BALANCE;
+        const DESCRIPTION_REQUEST = "Some description"
+        describe('and manager creates a new Request', () => {
+            beforeEach(async () => {
+                BALANCE = contractDeployer.getWeb3Object().utils.toWei("1", 'ether');
+                VALID_ETHER_VALUE_WEI = contractDeployer.getWeb3Object().utils.toWei("0.01", 'ether');
+                campaign = await contractDeployer.deployContract(account, [100], BALANCE);
+                value = contractDeployer.getWeb3Object().utils.toWei("0.1", 'ether');
+                recipient = accounts[1].toLowerCase()
+                await campaign.methods.createRequest(DESCRIPTION_REQUEST, value, recipient).send({ from: account, gas: 1000000 });
+            });
+            describe('and we have several  and two of them approves it', () => {
+                let anotherAccount03, anotherAccount06, anotherAccount04;
+                beforeEach(async () => {
+                    anotherAccount = accounts[2].toLowerCase();
+                    anotherAccount03 = accounts[3].toLowerCase();
+                    anotherAccount04 = accounts[4].toLowerCase();
+                    anotherAccount06 = accounts[6].toLowerCase();
+                    await campaign.methods.contribute().send({ from: anotherAccount, value: VALID_ETHER_VALUE_WEI  });
+                    await campaign.methods.contribute().send({ from: anotherAccount03, value: VALID_ETHER_VALUE_WEI  });
+                    await campaign.methods.contribute().send({ from: anotherAccount04, value: VALID_ETHER_VALUE_WEI  });
+                    await campaign.methods.contribute().send({ from: anotherAccount06, value: VALID_ETHER_VALUE_WEI  });
+                });
+                describe('as we have over 50% of contributors approving that request', () => {
+                    beforeEach(async () => {
+                        await campaign.methods.approveRequest(0).send({ from: anotherAccount, gas: 1000000 });
+                        await campaign.methods.approveRequest(0).send({ from: anotherAccount03, gas: 1000000 });
+                        await campaign.methods.approveRequest(0).send({ from: anotherAccount04, gas: 1000000 });
+                    });
 
+                    it('exists approvers for request should be true', async () => {
+                        const result = await campaign.methods.existsApproversForRequest().call();
+                        expect(result).to.be.true
+                    })
+                    it('enoughApproversForRequest (uint requestIndex) for request should be true', async () => {
+                        const request = await campaign.methods.requests(0).call();
+                        expect(request.numApprovals).to.eq("3")
+                        const approversCount = await campaign.methods.approversCount().call();
+                        expect(approversCount).to.eq("4")
+                        const result = await campaign.methods.enoughApproversForRequest(0).call();
+                        expect(result).to.be.true
+                    })
+                    it(`manager allows to finalize request `, async() => {
+                        await campaign.methods.finalizeRequest(0).send({ from: account, gas: 1000000 });
+                        const request = await campaign.methods.requests(0).call();
+                        expect(request.complete).to.eq(true);
+                    })
+                    it(`manager wants to finalize and request is completed throws an error `, async() => {
+                        try {
+                            await campaign.methods.finalizeRequest(0).send({ from: account, gas: 1000000 });
+                            const request = await campaign.methods.requests(0).call();
+                            expect(request.complete).to.be.true
+                            await campaign.methods.finalizeRequest(0).send({ from: account, gas: 1000000 });
+                            expect.fail('Should fail')
+                        } catch (e) {
+                            expect(e.message.split('\n')[0]).to.eq(STD_ERROR_TX)
+                        }
+                        const request = await campaign.methods.requests(0).call();
+                        expect(request.complete).to.be.true
+                    })
+                    it(`when other user wants to finalize throws an error`, async() => {
+                        try {
+                            await campaign.methods.finalizeRequest(0).send({ from: anotherAccount, gas: 1000000 });
+                            expect.fail('Should fail')
+                        } catch (e) {
+                            expect(e.message.split('\n')[0]).to.eq(STD_ERROR_TX)
+                        }
+                        const request = await campaign.methods.requests(0).call();
+                        expect(request.complete).to.eq(false);
+                    })
+                })
+                describe('as we have bellow 50% of contributors approving that request', () => {
+                    beforeEach(async () => {
+                        await campaign.methods.approveRequest(0).send({ from: anotherAccount, gas: 1000000 });
+                    });
+                    it('enoughApproversForRequest (uint requestIndex) for request should be false', async () => {
+                        const request = await campaign.methods.requests(0).call();
+                        expect(request.numApprovals).to.eq("1")
+                        const approversCount = await campaign.methods.approversCount().call();
+                        expect(approversCount).to.eq("4")
+                        const result = await campaign.methods.enoughApproversForRequest(0).call();
+                        expect(result).to.be.false
+                    })
 
+                    it(`manager is not allowed to finalize request `, async() => {
+                        try {
+                            await campaign.methods.finalizeRequest(0).send({ from: account, gas: 1000000 });
+                            expect.fail('Should fail')
+                        } catch (e) {
+                            expect(e.message.split('\n')[0]).to.eq(STD_ERROR_TX)
+                        }
+                        const request = await campaign.methods.requests(0).call();
+                        expect(request.complete).to.eq(false);
+                    })
+                })
+            })
+        })
+    })
 })

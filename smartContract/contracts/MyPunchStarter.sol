@@ -19,6 +19,7 @@ contract MyPunchStarter {
     uint public minimumContribution;
     uint public lastContribution;
     mapping(address => bool) public approvers;
+    uint public approversCount;
 
     modifier restricted() {
         require(msg.sender == manager);
@@ -34,6 +35,7 @@ contract MyPunchStarter {
         require(msg.value > minimumContribution);
         lastContribution = msg.value;
         approvers[msg.sender] = true;
+        approversCount++;
     }
 
     function createRequest(string memory description, uint value, address recipient) public restricted payable {
@@ -42,6 +44,7 @@ contract MyPunchStarter {
         newRequest.value = value;
         newRequest.recipient = recipient;
         newRequest.complete = false;
+        newRequest.numApprovals = 0;
         newRequest.approvals[manager] = false;
         numRequests++;
     }
@@ -51,11 +54,32 @@ contract MyPunchStarter {
     }
 
 
-    function approveRequest(uint requestIndex) public  {
+    function existsApproversForRequest ()  public view returns (bool)  {
+        return (approversCount > 0);
+    }
+
+    function enoughApproversForRequest (uint requestIndex)  public view returns (bool)  {
+        require(existsApproversForRequest());
         Request storage request = requests[requestIndex];
+        return (request.numApprovals > (approversCount/2));
+
+    }
+
+    function finalizeRequest(uint requestIndex) public restricted  {
+        Request storage request = requests[requestIndex];
+        require(!request.complete);
+        require(enoughApproversForRequest(requestIndex));
+        request.complete = true;
+        address payable recipient = payable(request.recipient);
+        recipient.transfer(request.value);
+
+    }
+
+    function approveRequest(uint requestIndex) public  {
         require(approvers[msg.sender]);
+        Request storage request = requests[requestIndex];
         require(!request.approvals[msg.sender]);
-        request.approvalCount++;
+        request.numApprovals++;
         request.approvals[msg.sender] = true;
     }
 }

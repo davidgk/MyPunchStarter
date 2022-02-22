@@ -25,7 +25,7 @@ contract MyPunchStarter {
         _;
     }
 
-    constructor ( uint8 minimum) {
+    constructor ( uint minimum) payable{
         manager = msg.sender;
         minimumContribution = minimum;
     }
@@ -36,7 +36,7 @@ contract MyPunchStarter {
         approvers[msg.sender] = true;
     }
 
-    function createRequest(string memory description, uint value, address recipient) public restricted {
+    function createRequest(string memory description, uint value, address recipient) public restricted payable {
         Request storage newRequest = requests[numRequests];
         newRequest.description = description;
         newRequest.value = value;
@@ -46,13 +46,16 @@ contract MyPunchStarter {
         numRequests++;
     }
 
+    function balance() public view returns (uint){
+        return address(this).balance;
+    }
+
+
     function approveRequest(uint requestIndex) public  {
+        Request storage request = requests[requestIndex];
         require(approvers[msg.sender]);
         require(!request.approvals[msg.sender]);
-        Request storage request = requests[requestIndex];
         request.approvalCount++;
         request.approvals[msg.sender] = true;
     }
-
-    function approveRequest() public view {}
 }

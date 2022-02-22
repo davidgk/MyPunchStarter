@@ -26,7 +26,7 @@ describe ('MyPunchStarter Contract tests', () => {
     })
     describe('when the campaign has a correct minimumContribution', () => {
         beforeEach(async () =>{
-            campaign = await contractDeployer.deployContract(account, [100]);
+            campaign = await contractDeployer.deployContract(account, [100], MINIMUN_CONTRIBUTION);
         })
         it( 'obtain accounts from web3', () => {
             expect(accounts.length > 0).to.be.true;
@@ -121,30 +121,45 @@ describe ('MyPunchStarter Contract tests', () => {
     })
 
     describe ('#approveRequest', () => {
-        let anotherAccount, value, recipient, VALID_ETHER_VALUE_WEI;
+        let anotherAccount, value, recipient, VALID_ETHER_VALUE_WEI, BALANCE;
         const DESCRIPTION_REQUEST = "Some description"
         describe('and we have several contributors', () => {
             beforeEach(async () => {
-                campaign = await contractDeployer.deployContract(account, [100]);
+                BALANCE = contractDeployer.getWeb3Object().utils.toWei("1", 'ether');
                 VALID_ETHER_VALUE_WEI = contractDeployer.getWeb3Object().utils.toWei("0.01", 'ether');
-                await campaign.methods.contribute().send({ from: accounts[1].toLowerCase(), value: VALID_ETHER_VALUE_WEI  });
-                await campaign.methods.contribute().send({ from: accounts[2].toLowerCase(), value: VALID_ETHER_VALUE_WEI  });
-                await campaign.methods.contribute().send({ from: accounts[3].toLowerCase(), value: VALID_ETHER_VALUE_WEI  });
+                campaign = await contractDeployer.deployContract(account, [100], BALANCE);
             });
             describe('and manager creates a new Request', () => {
                 beforeEach(async () => {
                     value = contractDeployer.getWeb3Object().utils.toWei("0.1", 'ether');
-                    campaign = await contractDeployer.deployContract(account, [100]);
-                    recipient = accounts[1]
-                    anotherAccount = accounts[2]
+                    recipient = accounts[1].toLowerCase()
+                    anotherAccount = accounts[2].toLowerCase();
+                    await campaign.methods.contribute().send({ from: anotherAccount, value: VALID_ETHER_VALUE_WEI  });
                     await campaign.methods.createRequest(DESCRIPTION_REQUEST, value, recipient).send({ from: account, gas: 1000000 });
                 });
                 it(`when an user with account which not approves previously is a contributor can approve it `, async() => {
-                    await campaign.methods.approveRequest(0).send({ from: accounts[1].toLowerCase(), gas: 1000000 });
+                    await campaign.methods.approveRequest(0).send({ from: anotherAccount, gas: 1000000 });
                     const request = await campaign.methods.requests(0).call();
                     expect(request.approvalCount).to.eq("1");
-                    expect(request.approvals[account[1]]).to.be.true
                 })
+                it(`when an user with account which  approves previously throws an error`, async() => {
+                    try {
+                        await campaign.methods.approveRequest(0).send({from: anotherAccount, gas: 1000000});
+                        await campaign.methods.approveRequest(0).send({from: anotherAccount, gas: 1000000});
+                        expect.fail('Should fail')
+                    } catch (e) {
+                        expect(e.message.split('\n')[0]).to.eq(STD_ERROR_TX)
+                    }
+                })
+                it(`when an user with account which  not contribute previously throws an error`, async() => {
+                    try {
+                        await campaign.methods.approveRequest(0).send({from: accounts[5].toLowerCase(), gas: 1000000});
+                        expect.fail('Should fail')
+                    } catch (e) {
+                        expect(e.message.split('\n')[0]).to.eq(STD_ERROR_TX)
+                    }
+                })
+
             })
         })
 

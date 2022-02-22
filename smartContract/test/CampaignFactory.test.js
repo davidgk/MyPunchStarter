@@ -1,7 +1,7 @@
 
-const {getDeployManager} = require("zicky");
+const {getDeployManager, getAbiFromContract} = require("zicky");
 const {expect} = require("chai");
-const {compileCampaignFactory} = require("../config/contractCompiler");
+const {compileCampaignFactory, compileMyPunchStarter} = require("../config/contractCompiler");
 describe ('factoryFactory Contract tests', () => {
     let accounts, factory, contractDeployer, contractCompiled, account;
     beforeEach(async () => {
@@ -43,6 +43,15 @@ describe ('factoryFactory Contract tests', () => {
             await factory.methods.createCampaign(0).send({from: accounts[1].toLowerCase(), gas: 10000000});
             const deployedCampaigns = await factory.methods.deployedCampaigns(0).call();
             expect(deployedCampaigns.length).to.eq(42);
+        })
+        it('once created I can interact with the contract deployed and account 1 is its manager', async () => {
+            await factory.methods.createCampaign(0).send({from: accounts[1].toLowerCase(), gas: 10000000});
+            const contractAbi = compileMyPunchStarter().abi;
+            const campaignAddress = await factory.methods.deployedCampaigns(0).call();
+            let Contract = contractDeployer.getNetwork().Contract;
+            const deployedContractInTheNetwork = new Contract(contractAbi, campaignAddress);
+            let manager = await deployedContractInTheNetwork.methods.manager().call();
+            expect(manager.toLowerCase()).to.eq(accounts[1].toLowerCase());
         })
     })
     describe('getDeployedCampaigns', () => {

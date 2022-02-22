@@ -13,6 +13,10 @@ contract CampaignFactory {
         MyPunchStarter campaign = new MyPunchStarter(minimunContribution, msg.sender);
         deployedCampaigns.push(address(campaign));
     }
+
+    function getDeployedCampaigns() public view returns (address[] memory) {
+        return deployedCampaigns;
+    }
 }
 
 contract MyPunchStarter {

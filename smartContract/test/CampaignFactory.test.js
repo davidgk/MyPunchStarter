@@ -45,4 +45,14 @@ describe ('factoryFactory Contract tests', () => {
             expect(deployedCampaigns.length).to.eq(42);
         })
     })
+    describe('getDeployedCampaigns', () => {
+        beforeEach(async () =>{
+            factory = await contractDeployer.deployContract(account);
+            await factory.methods.createCampaign(0).send({from: accounts[1].toLowerCase(), gas: 10000000});
+        })
+        it( 'it adds the direction from the new contract', async () => {
+            const deployedCampaigns = await factory.methods.getDeployedCampaigns().call();
+            expect(deployedCampaigns.length).to.eq(1);
+        })
+    })
 })

@@ -26,7 +26,7 @@ describe ('MyPunchStarter Contract tests', () => {
     })
     describe('when the campaign has a correct minimumContribution', () => {
         beforeEach(async () =>{
-            campaign = await contractDeployer.deployContract(account, [100], MINIMUN_CONTRIBUTION);
+            campaign = await contractDeployer.deployContract(account, [100, account], MINIMUN_CONTRIBUTION);
         })
         it( 'obtain accounts from web3', () => {
             expect(accounts.length > 0).to.be.true;
@@ -55,7 +55,7 @@ describe ('MyPunchStarter Contract tests', () => {
     describe('when the campaign has an incorrect minimumContribution', () => {
         it( 'should throw an error', async () => {
             try {
-                campaign = await contractDeployer.deployContract(account, [-1]);
+                campaign = await contractDeployer.deployContract(account, [-1,account]);
                 expect.fail('Should fail')
             } catch (e) {
                 expect(e.message.split('\n')[0]).to.eq('value out-of-bounds (argument="minimum", value=-1, code=INVALID_ARGUMENT, version=abi/5.0.7)')
@@ -69,7 +69,7 @@ describe ('MyPunchStarter Contract tests', () => {
         describe('when the campaign has a correct minimumContribution', () => {
             beforeEach(async () => {
                 VALID_ETHER_VALUE_WEI = contractDeployer.getWeb3Object().utils.toWei("0.01", 'ether');
-                campaign = await contractDeployer.deployContract(account, [100]);
+                campaign = await contractDeployer.deployContract(account, [100, account]);
                 contributor = accounts[1]
             });
             it('and contributor add the correct amount should be added into approvers', async () => {
@@ -103,7 +103,7 @@ describe ('MyPunchStarter Contract tests', () => {
         describe('and manager creates a new Request', () => {
             beforeEach(async () => {
                 value = contractDeployer.getWeb3Object().utils.toWei("0.1", 'ether');
-                campaign = await contractDeployer.deployContract(account, [100]);
+                campaign = await contractDeployer.deployContract(account, [100, account]);
                 recipient = accounts[1]
                 anotherAccount = accounts[2]
 
@@ -127,7 +127,7 @@ describe ('MyPunchStarter Contract tests', () => {
             beforeEach(async () => {
                 BALANCE = contractDeployer.getWeb3Object().utils.toWei("1", 'ether');
                 VALID_ETHER_VALUE_WEI = contractDeployer.getWeb3Object().utils.toWei("0.01", 'ether');
-                campaign = await contractDeployer.deployContract(account, [100], BALANCE);
+                campaign = await contractDeployer.deployContract(account, [100, account], BALANCE);
                 value = contractDeployer.getWeb3Object().utils.toWei("0.1", 'ether');
                 recipient = accounts[1].toLowerCase()
                 await campaign.methods.createRequest(DESCRIPTION_REQUEST, value, recipient).send({ from: account, gas: 1000000 });
@@ -174,7 +174,7 @@ describe ('MyPunchStarter Contract tests', () => {
             beforeEach(async () => {
                 BALANCE = contractDeployer.getWeb3Object().utils.toWei("1", 'ether');
                 VALID_ETHER_VALUE_WEI = contractDeployer.getWeb3Object().utils.toWei("0.01", 'ether');
-                campaign = await contractDeployer.deployContract(account, [100], BALANCE);
+                campaign = await contractDeployer.deployContract(account, [100, account], BALANCE);
                 value = contractDeployer.getWeb3Object().utils.toWei("0.1", 'ether');
                 recipient = accounts[1].toLowerCase()
                 await campaign.methods.createRequest(DESCRIPTION_REQUEST, value, recipient).send({ from: account, gas: 1000000 });

@@ -7,7 +7,7 @@ describe ('factoryFactory Contract tests', () => {
     beforeEach(async () => {
         // Get a list of all accounts
         contractCompiled = compileCampaignFactory()
-        contractDeployer = await getDeployManager(contractCompiled)
+        contractDeployer = await getDeployManager(contractCompiled, 5000000)
         accounts = contractDeployer.accounts;
         account = accounts[0];
     })
@@ -33,6 +33,16 @@ describe ('factoryFactory Contract tests', () => {
                 let manager = await factory.methods.manager().call();
                 expect(manager.toLowerCase()).to.eq(account);
             })
+        })
+    })
+    describe('createCampaign', () => {
+        beforeEach(async () =>{
+            factory = await contractDeployer.deployContract(account);
+        })
+        it( 'it adds the direction from the new contract', async () => {
+            await factory.methods.createCampaign(0).send({from: accounts[1].toLowerCase(), gas: 10000000});
+            const deployedCampaigns = await factory.methods.deployedCampaigns(0).call();
+            expect(deployedCampaigns.length).to.eq(42);
         })
     })
 })

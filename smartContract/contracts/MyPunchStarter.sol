@@ -10,8 +10,8 @@ contract CampaignFactory {
     }
 
     function createCampaign(uint minimunContribution) public {
-        MyPunchStarter storage campaign = MyPunchStarter(minimunContribution);
-        deployedCampaigns.push(campaign);
+        MyPunchStarter campaign = new MyPunchStarter(minimunContribution, msg.sender);
+        deployedCampaigns.push(address(campaign));
     }
 }
 
@@ -39,8 +39,8 @@ contract MyPunchStarter {
         _;
     }
 
-    constructor ( uint minimum) payable{
-        manager = msg.sender;
+    constructor ( uint minimum, address creator) payable{
+        manager = creator;
         minimumContribution = minimum;
     }
 

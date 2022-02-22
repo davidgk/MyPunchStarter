@@ -1,5 +1,5 @@
 
-const {getDeployManager, getAbiFromContract} = require("zicky");
+const {getDeployManager} = require("zicky");
 const {expect} = require("chai");
 const {compileCampaignFactory, compileMyPunchStarter} = require("../config/contractCompiler");
 describe ('factoryFactory Contract tests', () => {

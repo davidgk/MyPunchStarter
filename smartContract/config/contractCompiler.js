@@ -4,7 +4,7 @@ const compileMyPunchStarter = () => {
     return compileContract('MyPunchStarter.sol', "smartContract/contracts")
 }
 const compileCampaignFactory = () => {
-    return compileContract('MyPunchStarter.sol', "smartContract/contracts", "CampaignFactory")
+    return compileContract('CampaignFactory.sol', "smartContract/contracts")
 }
 
 const getAbiCampaign = () => {

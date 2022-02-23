@@ -1,12 +1,6 @@
 // contract test code will go here
 const chaiAsPromised = require('chai-as-promised');
 const {expect} = require('chai');
-// Ethereum test network
-const ganache = require('ganache-cli');
-// how to communicate our code with that.
-const Web3 = require('web3')
-const path = require("path");
-const fs = require("fs");
 const {compileMyPunchStarter} = require("../config/contractCompiler");
 const {getDeployManager} = require("zicky");
 // get the interface and definition from contract , once compiled
@@ -16,7 +10,7 @@ const STD_ERROR_TX = 'Transaction has been reverted by the EVM:';
 
 describe ('MyPunchStarter Contract tests', () => {
     let accounts, campaign, contractDeployer, contractCompiled, account, MINIMUN_CONTRIBUTION;
-    beforeEach(async () => {
+    before(async () => {
         // Get a list of all accounts
         contractCompiled = compileMyPunchStarter()
         contractDeployer = await getDeployManager(contractCompiled)

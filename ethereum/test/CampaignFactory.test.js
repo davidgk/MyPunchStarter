@@ -1,10 +1,10 @@
 
-const {getDeployManager, getAbiFromContract} = require("zicky");
+const {getDeployManager} = require("zicky");
 const {expect} = require("chai");
 const {compileCampaignFactory, compileMyPunchStarter} = require("../config/contractCompiler");
 describe ('factoryFactory Contract tests', () => {
     let accounts, factory, contractDeployer, contractCompiled, account;
-    beforeEach(async () => {
+    before(async () => {
         // Get a list of all accounts
         contractCompiled = compileCampaignFactory()
         contractDeployer = await getDeployManager(contractCompiled, 5000000)

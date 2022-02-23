@@ -103,7 +103,7 @@ describe ('MyPunchStarter Contract tests', () => {
 
             });
             it(`when an user with account which is a contributor can approve it approve it`, async () => {
-                await campaign.methods.createRequest(DESCRIPTION_REQUEST, value, recipient).send({ from: account, gas: 1000000 });// TOOD
+                await campaign.methods.createRequest(DESCRIPTION_REQUEST, value, recipient).send({ from: account, gas: 1000000 });
                 const request = await campaign.methods.requests(0).call();
                 expect(request.description).to.eq(DESCRIPTION_REQUEST);
                 expect(request.value).to.eq(value);

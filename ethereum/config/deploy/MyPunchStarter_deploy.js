@@ -1,10 +1,12 @@
 const path = require('path');
+const fse = require("fs-extra");
+const HDWalletProvider = require('@truffle/hdwallet-provider')
 const reqPath = path.join(__dirname,'../../../');
 const envPath = path.join(reqPath,'.env');
 require('dotenv').config({ path: envPath })
-const HDWalletProvider = require('@truffle/hdwallet-provider')
 const Web3 = require('web3')
-const {compileMyPunchStarter} = require("../contractCompiler");
+const {buildContracts} = require("../contractCompiler");
+
 /**
  *
  * @param apiInfura
@@ -27,21 +29,41 @@ const deploy = async (apiInfura = process.env.INFURA_RINKEBY_ENDPOINT_V3, contra
         const data = contractCompiled.evm.bytecode.object;
         const deployedContract = await new web3.eth.Contract(contractCompiled.abi)
             .deploy({  data  })
-            .send({ gas: 1000000 , from: accounts[0] });
+            .send({ gas: 5000000 , from: accounts[0] });
 
-        console.log('Contract deployed to', deployedContract.options.address)
+        console.log('Contract deployed to', deployedContract.options.address.toLowerCase())
+        printLastDeployDirection(deployedContract.options.address.toLowerCase())
 
     }
     await provider.engine.stop();
 }
-
-
-const deployLotteryRinkeby = async () => {
-    await deploy(process.env.INFURA_RINKEBY_ENDPOINT_V3, compileMyPunchStarter());
+// Contract deployed to 0xEB41D43D44CACEE518147f94E3f254F890280Aad
+function printLastDeployDirection(address) {
+    const today = new Date();
+    fse.outputFileSync(
+        path.resolve("./", `deploy-${(today.getMonth()+1) +"-"+today.getDate()+"-"+today.getFullYear()+":"+today.getTime()}.json`),
+        JSON.stringify(`{ campaign_address: ${address}, date: ${new Date()}`)
+    )
 }
 
-deployLotteryRinkeby();
+
+
+const deployRinkeby = async () => {
+    try {
+        console.log("Build Campaign")
+        await buildContracts();
+        console.log("Get Campaign file compiled")
+        const campaignFactory = require('../../../buildContract/CampaignFactory.json')
+        console.log("deploy on Rinkeby")
+        await deploy(process.env.INFURA_RINKEBY_ENDPOINT_V3, campaignFactory);
+        console.log("end")
+    } catch (e) {
+        console.error(e.message)
+    }
+}
+
+deployRinkeby();
 
 module.exports = {
-    deployLotteryRinkeby
+    deployRinkeby
 }

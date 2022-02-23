@@ -10,6 +10,9 @@ const compileCampaignFactory = () => {
 const buildContracts = async () => {
     await compileAndPrintContract('MyPunchStarter.sol', "ethereum/contracts")
 }
+
+
+
 module.exports = {
     compileMyPunchStarter,
     compileCampaignFactory,

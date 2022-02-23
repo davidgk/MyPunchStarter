@@ -37,12 +37,15 @@ const deploy = async (apiInfura = process.env.INFURA_RINKEBY_ENDPOINT_V3, contra
     }
     await provider.engine.stop();
 }
-// Contract deployed to 0xEB41D43D44CACEE518147f94E3f254F890280Aad
+
 function printLastDeployDirection(address) {
     const today = new Date();
     fse.outputFileSync(
-        path.resolve("./", `deploy-${(today.getMonth()+1) +"-"+today.getDate()+"-"+today.getFullYear()+":"+today.getTime()}.json`),
-        JSON.stringify(`{ campaign_address: ${address}, date: ${new Date()}`)
+        path.resolve("./", 'last_deploy.json'),
+        JSON.stringify(JSON.parse(`{ 
+            "last_deploy": "${(today.getMonth()+1) +"-"+today.getDate()+"-"+today.getFullYear()+":"+today.getTime()}, " +
+            "address": "${address}" + 
+        "}`))
     )
 }
 

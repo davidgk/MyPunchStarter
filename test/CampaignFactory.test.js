@@ -1,7 +1,7 @@
 
 const {getDeployManager} = require("zicky");
 const {expect} = require("chai");
-const {compileCampaignFactory, compileMyPunchStarter} = require("../config/contractCompiler");
+const {compileCampaignFactory, compileMyPunchStarter} = require("../ethereum/config/contractCompiler");
 describe ('factoryFactory Contract tests', () => {
     let accounts, factory, contractDeployer, contractCompiled, account;
     before(async () => {

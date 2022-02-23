@@ -1,7 +1,7 @@
 
 const {expect} = require("chai");
 const fse = require("fs-extra");
-const {buildContracts} = require("../config/contractCompiler");
+const {buildContracts} = require("../ethereum/config/contractCompiler");
 
 describe ('ContractCompiler tests', () => {
     describe('#buildContracts', () =>{

@@ -1,7 +1,7 @@
 // contract test code will go here
 const chaiAsPromised = require('chai-as-promised');
 const {expect} = require('chai');
-const {compileMyPunchStarter} = require("../config/contractCompiler");
+const {compileMyPunchStarter} = require("../ethereum/config/contractCompiler");
 const {getDeployManager} = require("zicky");
 // get the interface and definition from contract , once compiled
 

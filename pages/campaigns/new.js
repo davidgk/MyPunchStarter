@@ -1,7 +1,7 @@
 import Layout from "../../components/Layout";
 import {Button, Form, Input, Message} from "semantic-ui-react";
 import ethereumService from "../../services/EthereumService";
-
+import {Router} from "../../routes";
 const {Component} = require("react");
 
 
@@ -20,6 +20,7 @@ class CampaignNew extends Component {
         try {
             this.setState({errorMessage: ''})
             await ethereumService.createCampaign(Number(this.state.minimumContribution));
+            await Router.pushRoute('/')
         } catch (e) {
             this.setState({errorMessage: e.message})
         }

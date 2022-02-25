@@ -3,7 +3,7 @@ import CampaignFactory from "../../lastCompiledDeployed/CampaignFactory.json"
 import lastDeploy from "../../lastCompiledDeployed/last_deploy.json"
 
 const instance = new web3.eth.Contract(
-    JSON.parse(CampaignFactory.abi),
+    CampaignFactory.abi,
     lastDeploy.address
 );
 

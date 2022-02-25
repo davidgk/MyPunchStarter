@@ -44,8 +44,7 @@ function printLastDeployDirection(address) {
         path.resolve("./", 'last_deploy.json'),
         JSON.stringify(JSON.parse(`{ 
             "last_deploy": "${(today.getMonth()+1) +"-"+today.getDate()+"-"+today.getFullYear()+":"+today.getTime()}, " +
-            "address": "${address}" + 
-        "}`))
+            "address": "${address}"}`))
     )
 }
 

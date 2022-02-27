@@ -30,7 +30,15 @@ contract MyPunchStarter {
         mapping(address => bool) approvals;
     }
 
+    struct CampaignSummary {
+        uint minContribution;
+        uint contributors;
+        uint pendingRequest;
+        uint balance;
+    }
+
     uint numRequests;
+    uint uncompletedRequest;
     mapping(uint => Request) public requests;
     address public manager;
     uint public minimumContribution;
@@ -64,6 +72,7 @@ contract MyPunchStarter {
         newRequest.numApprovals = 0;
         newRequest.approvals[manager] = false;
         numRequests++;
+        uncompletedRequest++;
     }
 
     function balance() public view returns (uint){
@@ -75,11 +84,20 @@ contract MyPunchStarter {
         return (approversCount > 0);
     }
 
+    function getSummary()  public view returns (CampaignSummary memory)  {
+        CampaignSummary memory summary = CampaignSummary({
+            minContribution: minimumContribution,
+            contributors: approversCount,
+            pendingRequest: uncompletedRequest,
+            balance: balance()
+        });
+        return summary;
+    }
+
     function enoughApproversForRequest (uint requestIndex)  public view returns (bool)  {
         require(existsApproversForRequest());
         Request storage request = requests[requestIndex];
         return (request.numApprovals > (approversCount/2));
-
     }
 
     function finalizeRequest(uint requestIndex) public restricted  {
@@ -87,9 +105,9 @@ contract MyPunchStarter {
         require(!request.complete);
         require(enoughApproversForRequest(requestIndex));
         request.complete = true;
+        uncompletedRequest--;
         address payable recipient = payable(request.recipient);
         recipient.transfer(request.value);
-
     }
 
     function approveRequest(uint requestIndex) public  {

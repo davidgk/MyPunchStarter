@@ -13,7 +13,7 @@ describe ('MyPunchStarter Contract tests', () => {
     before(async () => {
         // Get a list of all accounts
         contractCompiled = compileMyPunchStarter()
-        contractDeployer = await getDeployManager(contractCompiled)
+        contractDeployer = await getDeployManager(contractCompiled, 3000000)
         MINIMUN_CONTRIBUTION = contractDeployer.getWeb3Object().utils.toWei("1", 'ether');
         accounts = contractDeployer.accounts;
         account = accounts[0];
@@ -256,6 +256,42 @@ describe ('MyPunchStarter Contract tests', () => {
                         const request = await campaign.methods.requests(0).call();
                         expect(request.complete).to.eq(false);
                     })
+                })
+            })
+        })
+    })
+
+    describe ('#getSummary', () => {
+        let anotherAccount, value, recipient, VALID_ETHER_VALUE_WEI, BALANCE;
+        const DESCRIPTION_REQUEST = "Some description"
+        describe('and manager creates a new Request', () => {
+            beforeEach(async () => {
+                BALANCE = contractDeployer.getWeb3Object().utils.toWei("1", 'ether');
+                VALID_ETHER_VALUE_WEI = contractDeployer.getWeb3Object().utils.toWei("0.01", 'ether');
+                campaign = await contractDeployer.deployContract(account, [100, account], BALANCE);
+                value = contractDeployer.getWeb3Object().utils.toWei("0.1", 'ether');
+                recipient = accounts[1].toLowerCase()
+                await campaign.methods.createRequest("some description 01", value, recipient).send({ from: account, gas: 1000000 });
+                await campaign.methods.createRequest("some description 02", value, recipient).send({ from: account, gas: 1000000 });
+            });
+            describe('and we have several  and two of them approves it', () => {
+                let anotherAccount03, anotherAccount06, anotherAccount04;
+                beforeEach(async () => {
+                    anotherAccount = accounts[2].toLowerCase();
+                    anotherAccount03 = accounts[3].toLowerCase();
+                    anotherAccount04 = accounts[4].toLowerCase();
+                    anotherAccount06 = accounts[6].toLowerCase();
+                    await campaign.methods.contribute().send({ from: anotherAccount, value: VALID_ETHER_VALUE_WEI  });
+                    await campaign.methods.contribute().send({ from: anotherAccount03, value: VALID_ETHER_VALUE_WEI  });
+                    await campaign.methods.contribute().send({ from: anotherAccount04, value: VALID_ETHER_VALUE_WEI  });
+                    await campaign.methods.contribute().send({ from: anotherAccount06, value: VALID_ETHER_VALUE_WEI  });
+                });
+                it('when we get the summary we obtain the proper information ', async () => {
+                    const result = await campaign.methods.getSummary().call();
+                    expect(result.minContribution).to.eq("100")
+                    expect(result.contributors).to.eq("4")
+                    expect(result.pendingRequest).to.eq("2")
+                    expect(result.balance).to.eq("1040000000000000000")
                 })
             })
         })

@@ -94,6 +94,10 @@ contract MyPunchStarter {
         return summary;
     }
 
+    function getRequestsCount()  public view returns (uint)  {
+        return uncompletedRequest;
+    }
+
     function enoughApproversForRequest (uint requestIndex)  public view returns (bool)  {
         require(existsApproversForRequest());
         Request storage request = requests[requestIndex];

@@ -2,6 +2,7 @@ import factory from "../ethereum/config/factory";
 import {Component} from "react";
 import {Button, Card, Container, Label} from 'semantic-ui-react'
 import Layout from "../components/Layout";
+import {Link, Router} from "../routes";
 
 
 class CampaignIndex extends Component {
@@ -16,12 +17,18 @@ class CampaignIndex extends Component {
         const formattedCampaigns = this.props.campaigns.map((address) => {
             return {
                 header: address,
-                description: <a>View Campaign</a>,
+                description: (
+                    <Link route={`/campaigns/${address}`}>
+                        <a>View Campaign</a>
+                    </Link>
+                ),
                 fluid: true
             }
         })
         this.state = {campaigns: formattedCampaigns}
     }
+
+    createCampaign = async () => await Router.pushRoute('/campaigns/new')
 
     render() {
         return (
@@ -33,6 +40,7 @@ class CampaignIndex extends Component {
                     </Container>
                     <Container style={{ width:"20%" }}>
                         <Button
+                            onClick={this.createCampaign}
                             floated="right"
                             content="Create Campaign"
                             icon="add circle"

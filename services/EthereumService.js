@@ -1,7 +1,7 @@
 import factory from "../ethereum/config/factory";
 import web3 from "../ethereum/config/web3";
 import Campaign from "../lastCompiledDeployed/MyPunchStarter.json";
-import lastDeploy from "../lastCompiledDeployed/last_deploy.json";
+
 
 
 const getContractSummary = async (contractAddress) => {
@@ -21,7 +21,12 @@ const createCampaign = async (weiValue) => {
 
 }
 
+const getDeployedCampaigns = async () =>  {
+    return await factory.methods.getDeployedCampaigns().call();
+}
+
 export default {
     createCampaign,
-    getContractSummary
+    getContractSummary,
+    getDeployedCampaigns,
 }

@@ -3,12 +3,13 @@ import {Component} from "react";
 import {Button, Card, Container, Label} from 'semantic-ui-react'
 import Layout from "../components/Layout";
 import {Link, Router} from "../routes";
+import EthereumService from "../services/EthereumService";
 
 
 class CampaignIndex extends Component {
 
     static async getInitialProps(){
-        const campaigns = await factory.methods.getDeployedCampaigns().call();
+        const campaigns = await EthereumService.getDeployedCampaigns();
         return {campaigns};
     }
 

@@ -2,8 +2,9 @@ import {Component} from "react";
 import Layout from "../../components/Layout";
 import ContributionForm from "../../components/ContributionForm";
 import EthereumService from "../../services/EthereumService";
-import {CardGroup, Container} from "semantic-ui-react";
+import {Button, CardGroup, Container} from "semantic-ui-react";
 import web3 from "../../ethereum/config/web3";
+import {Router} from "../../routes";
 
 
 class CampaignShow extends Component {
@@ -40,6 +41,11 @@ class CampaignShow extends Component {
     }
 
 
+    viewRequest = async () => {
+        await Router.pushRoute(`/campaigns/${this.props.campaignAddress}/requests`)
+    }
+
+
     render () {
         return (
             <Layout>
@@ -47,6 +53,13 @@ class CampaignShow extends Component {
                 <div style={{display: "flex"}}>
                     <Container style={{ width:"60%"}}>
                         {this.renderCards()}
+                        <div style={{marginTop: "15px"}}>
+                            <Button
+                                onClick={this.viewRequest}
+                                primary >
+                                View Request
+                            </Button>
+                        </div>
                     </Container>
                     <Container style={{ width:"40%", paddingLeft: "20px"}}>
                         <ContributionForm address={this.props.campaignAddress} minContribution={this.props.campaignSummary.minContribution}/>

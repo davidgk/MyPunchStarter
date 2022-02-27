@@ -31,7 +31,7 @@ class CampaignShow extends Component {
                 meta: "Pending Request"
             },
             {
-                header: web3.utils.fromWei(String(this.props.campaignSummary.balance), 'ether') ,
+                header: web3.utils.fromWei(String(this.props.campaignSummary.balance || 0), 'ether') ,
                 description: "How many Wei this Campaign has been collected up to now.",
                 meta: "Campaign Balance (Ether)"
             }
@@ -49,7 +49,7 @@ class CampaignShow extends Component {
                         {this.renderCards()}
                     </Container>
                     <Container style={{ width:"40%", paddingLeft: "20px"}}>
-                        <ContributionForm address={this.props.campaignAddress}/>
+                        <ContributionForm address={this.props.campaignAddress} minContribution={this.props.campaignSummary.minContribution}/>
                     </Container>
                 </div>
             </Layout>

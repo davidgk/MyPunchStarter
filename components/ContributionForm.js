@@ -2,7 +2,7 @@ import {Component} from "react";
 import {Button, Form, Input, Message} from "semantic-ui-react";
 import ethereumService from "../services/EthereumService";
 import {Router} from "../routes";
-import EthereumService from "../services/EthereumService";
+
 
 
 class ContributionForm extends Component {
@@ -17,10 +17,14 @@ class ContributionForm extends Component {
 
     onSubmit = async(event) => {
         event.preventDefault();
+        debugger;
         this.setState({loading: true})
         try {
             this.setState({errorMessage: ''})
-            await ethereumService.createContributor(this.props.address, Number(this.state.minimumContribution));
+            let contribution = Number(this.state.minimumContribution);
+            if (contribution < Number(this.props.minContribution)) throw new Error("Contribution should be over than " + this.props.minContribution  )
+            await ethereumService.createContributor(this.props.address, contribution);
+            this.setState({minimumContribution: ''})
             await Router.pushRoute(`/campaigns/${this.props.address}`)
         } catch (e) {
             this.setState({errorMessage: e.message})
@@ -40,7 +44,7 @@ class ContributionForm extends Component {
                             label="wei"
                             labelPosition="right"
                             onChange={event => this.setState({minimumContribution: event.target.value})}
-                            placeholder='Will be the minimum value to be your project supporters' />
+                            placeholder='Will be the minimum value to be project support' />
                     </Form.Field>
                     <Message
                         error

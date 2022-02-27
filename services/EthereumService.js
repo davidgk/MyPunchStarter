@@ -13,11 +13,11 @@ function connectToSingleCampaign(contractAddress) {
 const createContributor  = async (address, contribution) => {
     const instance = connectToSingleCampaign(address);
     const accounts = await getAccounts();
-    await instance.methods.contribute(contribution)
+    await instance.methods.contribute()
         .send({
-            from: accounts[0]
+            from: accounts[0],
+            value: contribution
         });
-
 }
 
 

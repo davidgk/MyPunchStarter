@@ -43,9 +43,15 @@ const getDeployedCampaigns = async () =>  {
     return await factory.methods.getDeployedCampaigns().call();
 }
 
+const getRequestCount= async (address) => {
+    const instance = connectToSingleCampaign(address);
+    return await instance.methods.getRequestsCount().call();
+}
+
 export default {
     createCampaign,
     getContractSummary,
     getDeployedCampaigns,
     createContributor,
+    getRequestCount,
 }

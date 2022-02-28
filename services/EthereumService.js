@@ -53,8 +53,18 @@ const getDeployedCampaigns = async () =>  {
 }
 
 const getRequestCount= async (address) => {
-    const instance = connectToSingleCampaign(address);
-    return await instance.methods.getRequestsCount().call();
+    const campaign = connectToSingleCampaign(address);
+    let  requestCount  = await campaign.methods.getRequestsCount().call();
+    return {requestCount, campaign};
+}
+
+const getAllRequest= async (address, campaign, requestCount) => {
+    const instance = campaign || connectToSingleCampaign(address);
+    return  await Promise.all(
+       Array(Number(requestCount)).fill().map(async(element, index) => {
+          return await instance.methods.requests(index).call()
+       })
+    );
 }
 
 export default {
@@ -64,5 +74,6 @@ export default {
     createContributor,
     getRequestCount,
     createRequest,
+    getAllRequest,
 
 }

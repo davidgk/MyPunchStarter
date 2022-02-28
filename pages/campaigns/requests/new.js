@@ -25,7 +25,6 @@ class RequestNew extends Component {
 
     onSubmit = async(event) => {
         event.preventDefault();
-        debugger
         this.setState({loading: true})
         try {
             this.setState({errorMessage: ''})

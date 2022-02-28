@@ -10,8 +10,12 @@ class CampaignRequest extends Component {
 
     static async getInitialProps(props){
         let { address } = props.query;
-        const requestCount = await EthereumService.getRequestCount(address);
-        return {address, requestCount};
+        let requests = []
+        const {requestCount, campaign} = await EthereumService.getRequestCount(address);
+        if(requestCount> 0) {
+            requests = await EthereumService.getAllRequest(address, campaign, requestCount);
+        }
+        return {address, requestCount, requests};
     }
 
     addRequest = async () => {
@@ -51,7 +55,7 @@ class CampaignRequest extends Component {
     renderRequestTable = () =>  {
         if(this.props.requestCount > 0) {
             return (
-                <RequestTable/>
+                <RequestTable requests={this.props.requests} address={this.props.address}/>
             )
         } else {
             return (<div style={{margin: "30px"}}>

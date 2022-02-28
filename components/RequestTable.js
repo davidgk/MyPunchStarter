@@ -6,10 +6,10 @@ class RequestTable extends Component {
 
     render() {
         return (
-            <Layout>
+            <div>
                 <h3>Request table</h3>
 
-            </Layout>
+            </div>
         );
     }
 }

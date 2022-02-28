@@ -1,6 +1,6 @@
 import {Component} from "react";
 import Layout from "../../../components/Layout";
-import {Button, Container} from "semantic-ui-react";
+import {Button, Container, Grid, GridColumn, GridRow} from "semantic-ui-react";
 import {Router} from "../../../routes";
 import EthereumService from "../../../services/EthereumService";
 import RequestTable from "../../../components/RequestTable";
@@ -9,8 +9,9 @@ import RequestTable from "../../../components/RequestTable";
 class CampaignRequest extends Component {
 
     static async getInitialProps(props){
-        const requestCount = await EthereumService.getRequestCount(props.query.address);
-        return {address: props.query.address, requestCount};
+        let { address } = props.query;
+        const requestCount = await EthereumService.getRequestCount(address);
+        return {address, requestCount};
     }
 
     addRequest = async () => {
@@ -21,16 +22,20 @@ class CampaignRequest extends Component {
         return (
           <Layout>
               <Container>
-                  <Container>
-                      <div style={{display:"flex"}}>
-                          <h3>Requests</h3>
-                          <Button
-                              onClick={this.addRequest}
-                              primary >
-                              Add Request
-                          </Button>
-                      </div>
-                  </Container>
+                  <Grid columns={2} divided>
+                       <GridRow>
+                           <GridColumn>
+                               <h3>Requests</h3>
+                           </GridColumn>
+                           <GridColumn>
+                               <Button
+                                   onClick={this.addRequest}
+                                   primary >
+                                   Add Request
+                               </Button>
+                           </GridColumn>
+                       </GridRow>
+                  </Grid>
               </Container>
               <Container>
                   { this.renderRequestTable() }
@@ -48,6 +53,11 @@ class CampaignRequest extends Component {
             return (
                 <RequestTable/>
             )
+        } else {
+            return (<div style={{margin: "30px"}}>
+                <h3>No request for this contract. </h3>
+            </div>
+            );
         }
     }
 }

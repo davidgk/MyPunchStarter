@@ -30,6 +30,15 @@ function getAccounts() {
     return web3.eth.getAccounts();
 }
 
+const createRequest = async (address, description, value, recipient) => {
+    const instance = connectToSingleCampaign(address);
+    const accounts = await getAccounts();
+    await instance.methods.createRequest(description, value, recipient)
+        .send({
+            from: accounts[0]
+        });
+}
+
 const createCampaign = async (weiValue) => {
     const accounts = await getAccounts();
     await factory.methods.createCampaign(weiValue)
@@ -54,4 +63,6 @@ export default {
     getDeployedCampaigns,
     createContributor,
     getRequestCount,
+    createRequest,
+
 }

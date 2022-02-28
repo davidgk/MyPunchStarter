@@ -12,7 +12,11 @@ class RequestTable extends Component {
 
     renderTableRows = () => {
         return this.props.requests.map((req, index) => {
-            return <RequestRow request={req} key={index} order={index+1} address={this.props.address}/>
+            return <RequestRow
+                request={req} key={index}
+                order={index+1}
+                address={this.props.address}
+                approversCount={this.props.approversCount}/>
         })
     }
 

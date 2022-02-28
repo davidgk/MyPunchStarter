@@ -48,6 +48,25 @@ const createCampaign = async (weiValue) => {
 
 }
 
+const approveRequest = async (requestIndex, campaignAddress ) => {
+    const instance = connectToSingleCampaign(campaignAddress);
+    const accounts = await getAccounts();
+    await instance.methods.approveRequest(requestIndex)
+        .send({
+            from: accounts[0]
+        });
+
+}
+const finalizeRequest = async (requestIndex, campaignAddress ) => {
+    const instance = connectToSingleCampaign(campaignAddress);
+    const accounts = await getAccounts();
+    await instance.methods.finalizeRequest(requestIndex)
+        .send({
+            from: accounts[0]
+        });
+
+}
+
 const getDeployedCampaigns = async () =>  {
     return await factory.methods.getDeployedCampaigns().call();
 }
@@ -56,6 +75,11 @@ const getRequestCount= async (address) => {
     const campaign = connectToSingleCampaign(address);
     let  requestCount  = await campaign.methods.getRequestsCount().call();
     return {requestCount, campaign};
+}
+
+const getApproversCount= async (address, campaign) => {
+    const instance = campaign || connectToSingleCampaign(address);
+    return await instance.methods.approversCount().call();
 }
 
 const getAllRequest= async (address, campaign, requestCount) => {
@@ -75,5 +99,8 @@ export default {
     getRequestCount,
     createRequest,
     getAllRequest,
+    getApproversCount,
+    approveRequest,
+    finalizeRequest
 
 }
